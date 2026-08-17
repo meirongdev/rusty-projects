@@ -1,0 +1,12 @@
+[package]
+name = "guessing_game"
+# 下面四个字段继承自根目录 Cargo.toml 的 [workspace.package]。
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+# "0.10" 是范围而非精确版本（等价于 "^0.10"），锁定的版本记录在根 Cargo.lock。
+# 版本号语义见 docs/01-cargo-and-toolchain.md。
+rand = "0.10"

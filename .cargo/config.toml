@@ -1,0 +1,7 @@
+# 放在仓库根目录的 .cargo/ 下，对本仓库内任意子目录执行的 cargo 命令都生效。
+
+[alias]
+# --all-targets  连 #[cfg(test)] 里的测试代码一起检查
+# -- -D warnings 把所有警告升级为错误
+# 起别名的完整理由见 docs/01-cargo-and-toolchain.md。
+lint = "clippy --workspace --all-targets -- -D warnings"

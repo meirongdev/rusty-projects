@@ -1,0 +1,14 @@
+# Rust / Cargo 构建产物
+# 不带前导斜杠，顺带匹配子目录下单独构建时可能产生的 target/。
+target/
+**/*.rs.bk
+
+# Cargo.lock 故意不忽略：本仓库以 binary crate 为主，官方建议提交它以固定
+# 依赖版本。理由见 docs/01-cargo-and-toolchain.md。
+
+# 编辑器 / OS 杂项
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/

@@ -1,0 +1,16 @@
+# 虚拟清单（virtual manifest）：根目录自己不是一个 crate，没有 [package] 段，
+# 只负责把成员组织成一个 workspace。详见 docs/01-cargo-and-toolchain.md。
+[workspace]
+members = ["hello_cargo", "guessing_game"]
+
+# 虚拟清单不会从成员的 edition 推断 resolver，必须显式写出来，
+# 否则 Cargo 会回落到老的 resolver = "1" 并给出警告。
+resolver = "3"
+
+# 成员通过 `xxx.workspace = true` 继承下面这些字段。
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+# MSRV：edition 2024 需要 1.85+，rand 0.10 的下限也正好是 1.85。
+rust-version = "1.85"

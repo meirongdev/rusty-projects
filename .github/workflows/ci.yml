@@ -1,0 +1,46 @@
+name: CI
+
+# 只做三件事：查格式、查 lint、跑测试。这三条命令和本地完全一致
+#（见根 README「提交前的自检」），所以本地过了就不会在 CI 上翻车。
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      # 缓存 ~/.cargo 和 target/，第二次之后 CI 会快很多。
+      - uses: Swatinem/rust-cache@v2
+
+      - name: 检查代码格式
+        run: cargo fmt --all --check
+
+      # --locked 校验 Cargo.lock 与所有 Cargo.toml 一致，防止改了清单却忘了更新 lock。
+      - name: Clippy 静态检查
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: 运行测试
+        run: cargo test --workspace --locked
+
+  # 本地用最新 stable 永远证明不了「1.85 也能编译」，所以单开一个 job 用
+  # 1.85 跑 check，保证新代码不会偷偷用上更新的 API。
+  # MSRV 与 edition 的分工见 docs/01-cargo-and-toolchain.md。
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@1.85
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: 在最低支持的 Rust 版本上检查
+        run: cargo check --workspace --all-targets --locked

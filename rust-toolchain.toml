@@ -1,0 +1,8 @@
+# rustup 读到这个文件后会自动为本仓库切换工具链，并保证 rustfmt / clippy 装好。
+#
+# 刻意写 "stable" 而不是钉死版本号：教程仓库应该跟着最新 stable 走。
+# 版本下限由根 Cargo.toml 的 rust-version 声明，两者的分工见
+# docs/01-cargo-and-toolchain.md。
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]

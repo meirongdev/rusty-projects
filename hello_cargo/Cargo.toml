@@ -1,0 +1,9 @@
+[package]
+name = "hello_cargo"
+# 下面四个字段继承自根目录 Cargo.toml 的 [workspace.package]。
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
