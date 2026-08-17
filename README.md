@@ -20,6 +20,7 @@
 |---|------|------|---------|
 | 1 | [`hello_cargo`](./hello_cargo) | Cargo 项目结构与构建流程 | [01](./docs/01-cargo-and-toolchain.md)、[08](./docs/08-formatting-and-macros.md) |
 | 2 | [`guessing_game`](./guessing_game) | 从 Hello World 迈向真实小程序 | [01](./docs/01-cargo-and-toolchain.md)–[09](./docs/09-testing.md) |
+| 3 | [`notebook`](./notebook) | 所有权、借用与生命周期的练习场 | [03](./docs/03-ownership-and-borrowing.md)、[10](./docs/10-lifetimes-and-more-ownership.md) |
 
 ## 前置条件
 
