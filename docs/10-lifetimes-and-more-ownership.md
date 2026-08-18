@@ -29,8 +29,14 @@ pub fn get<'a>(&'a self, title: &str) -> Option<&'a Entry>
 ```
 
 这里有两个输入引用（`&self` 和 `&str`），所以返回值只能挂在 `self` 上。代码里那个显式的
-`'a` 是**故意写出来**方便对照省略规则的——把它去掉，`cargo clippy` 会提示 `needless_lifetimes`，
-因为省略规则已经能推出同样的结果。
+`'a` 是**故意写出来**方便对照省略规则的——省略规则本来就能推出同样的签名，写成
+`fn get(&self, title: &str) -> Option<&Entry>` 与它完全等价。
+
+> **别指望 clippy 替你发现多余的生命周期。** 直觉上会以为把 `'a` 留着会挨一条
+> `needless_lifetimes`，实测并不会：那条 lint 只在它有十足把握的情形下出声（比如只有一个
+> 输入生命周期），轮到「多个输入引用、靠 `&self` 规则省略」它就不管了。所以 `notebook`
+> 里这一处既不需要 `#[allow(clippy::needless_lifetimes)]`，也别把「clippy 没报」当成
+> 「这个标注是必要的」。
 
 **含义**：返回的 `&Entry` 能活多久，取决于 `Notebook` 借给你多久，**不是**取决于查找键
 `title` 活多久。所以调用方可以这么写：
@@ -75,8 +81,35 @@ fn bad() -> &str {
 的引用往回带。**
 
 **两个 `&self` 可以共存，`&self` 和 `&mut self` 不能。** 借用一个对象时，要么读很多次
-（很多 `&`），要么写一次（一个 `&mut`），二者不能同时出现。把仓库里测试
-`cannot_hold_ref_and_mut_at_once` 中被注释掉的那行放开，编译器会直接告诉你冲突在哪。
+（很多 `&`），要么写一次（一个 `&mut`），二者不能同时出现。
+
+**但「同时」指的是什么？——看借用最后一次被使用的位置，不是它被声明的位置。** 这条规则叫
+NLL（non-lexical lifetimes），是这一章最容易想当然的地方。下面两段只差最后一行，
+结果一个编不过、一个编得过：
+
+```rust
+// ❌ 编译失败：E0502
+let view = nb.get("hello");     // &self 借用从这里开始
+let edit = nb.get_mut("hello"); // ERROR: cannot borrow `nb` as mutable
+println!("{view:?}");           // ← 正是这一行让上面那个借用一直活到现在
+```
+
+```rust
+// ✅ 编译通过
+let view = nb.get("hello");
+println!("{view:?}");           // view 最后一次被使用，借用到此为止
+let edit = nb.get_mut("hello"); // 于是这里要 &mut self 毫无问题
+```
+
+**光「声明了一个 `&self` 借用」并不构成冲突**，后面还要用它才构成。这也是为什么很多借用
+报错的修法是「把那次使用挪上去」或「加一对花括号缩小作用域」——你不是在骗编译器，
+你是真的让借用早点结束了。
+
+> 这一课本仓库是踩出来的：`notebook` 里曾有一条注释写着「取消注释这行会编译失败」，
+> 而实际取消之后照样编译通过——因为那个借用之后再没被用过。现在两半都由工具钉住了：
+> 编不过的那半写成 `Notebook::get_mut` 文档里的 ` ```compile_fail,E0502 ` doctest，
+> 编得过的那半是单元测试 `borrow_ends_at_last_use`。**「这样写会报错」这种话，
+> 要么让编译器替你验证，要么别写**（做法见[笔记 09](./09-testing.md#compile_fail把报错断言交给编译器)）。
 
 ## 延伸阅读
 

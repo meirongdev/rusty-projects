@@ -4,6 +4,25 @@
 //! 小例子。每一个公开方法在哪一种所有权行为上做文章，都写在方法头上，
 //! 读完代码就相当于复习了 docs/03-ownership-and-borrowing.md 与
 //! docs/10-lifetimes-and-more-ownership.md 两篇笔记。
+//!
+//! 方法头上那些 ` ```compile_fail ` 例子不是摆设：`cargo test` 会真的去编译它们，
+//! 并要求编译**失败**。所有权的「这样写会报错」在这里是被工具钉住的断言，
+//! 而不是一句没人验证的注释——doctest 的用法见 docs/09-testing.md。
+//!
+//! # Examples
+//!
+//! ```
+//! use notebook::Notebook;
+//!
+//! let mut nb = Notebook::new();
+//! nb.add("hello".to_string(), "World, hello!".to_string());
+//!
+//! assert_eq!(nb.get("hello").unwrap().body, "World, hello!"); // 借出去看一眼
+//!
+//! let entry = nb.remove("hello").unwrap(); // 所有权整个交回调用方
+//! assert_eq!(entry.title, "hello");
+//! assert!(nb.is_empty());
+//! ```
 
 /// 一条笔记。
 ///
@@ -24,10 +43,11 @@ pub struct Notebook {
 
 impl Notebook {
     /// 空的笔记本。
+    ///
+    /// 实现直接委托给 `#[derive(Default)]`：同一份「空是什么样」只写一处，
+    /// 将来给 `entries` 换容器时也只改一个地方。
     pub fn new() -> Self {
-        Self {
-            entries: Vec::new(),
-        }
+        Self::default()
     }
 
     /// 有多少条笔记。
@@ -44,6 +64,25 @@ impl Notebook {
     ///
     /// 调用之后，调用方手里的 title / body 都不再有效——所有权已经交给本函数，
     /// 再往下一直归 Notebook 所有。这就是「值会移动」的直观演示。
+    ///
+    /// # 标题不去重
+    ///
+    /// 这是一个 `Vec` 而不是 `HashMap`：重复标题会被原样追加两条，`get` /
+    /// `get_mut` / `remove` 都只作用于**最先加进去的那条**。想要 map 语义
+    /// 得自己在调用前判断，见 README 的扩展练习。
+    ///
+    /// # Examples
+    ///
+    /// 移动之后原变量就不能再用了。这一点由编译器盯着：
+    ///
+    /// ```compile_fail,E0382
+    /// use notebook::Notebook;
+    ///
+    /// let mut nb = Notebook::new();
+    /// let title = String::from("hello");
+    /// nb.add(title, "World, hello!".to_string()); // title 的所有权进了 add
+    /// println!("{title}");                        // ERROR: borrow of moved value
+    /// ```
     pub fn add(&mut self, title: String, body: String) {
         self.entries.push(Entry { title, body });
     }
@@ -55,7 +94,26 @@ impl Notebook {
     /// 换句话说，返回的 &Entry 能活多久，取决于 Notebook 借给你多久，而不是
     /// title 这个查找键。这也是「不能返回对局部变量的引用」这条报错的来源：
     /// 返回的借用必须还挂在某个输入引用上。
-    #[allow(clippy::needless_lifetimes)] // 故意保留显式生命周期，方便对照省略规则
+    ///
+    /// 下面的 `'a` 是**手写**的，省略规则本来就能推出同样的签名——留着纯粹是为了
+    /// 和规则逐条对照。（clippy 的 `needless_lifetimes` 不会提示这一处：它对
+    /// 「靠 `&self` 规则省略」的情形并不 lint，所以这里不需要任何 `#[allow]`。）
+    ///
+    /// # Examples
+    ///
+    /// 返回的借用挂在 `&self` 上，和查找键无关——键先死也不影响它：
+    ///
+    /// ```
+    /// use notebook::Notebook;
+    ///
+    /// let mut nb = Notebook::new();
+    /// nb.add("rust".to_string(), "Ownership is the core".to_string());
+    ///
+    /// let key = String::from("rust");
+    /// let entry = nb.get(&key).unwrap(); // 借用挂在 nb 上
+    /// drop(key);                         // 键被丢弃
+    /// assert_eq!(entry.body, "Ownership is the core"); // entry 照样能用
+    /// ```
     pub fn get<'a>(&'a self, title: &str) -> Option<&'a Entry> {
         self.entries.iter().find(|entry| entry.title == title)
     }
@@ -64,6 +122,26 @@ impl Notebook {
     ///
     /// 它和 get 不能同时使用——对同一个 Notebook 你只能要么有很多个 &self，
     /// 要么只有一个 &mut self。这条规则从根上杜绝了数据竞争。
+    ///
+    /// # Examples
+    ///
+    /// **「同时」看的是借用最后一次被使用的位置，不是它声明的位置**（NLL）。
+    /// 下面这段编译不过，而决定性的是最后那行 `println!`：
+    ///
+    /// ```compile_fail,E0502
+    /// use notebook::Notebook;
+    ///
+    /// let mut nb = Notebook::new();
+    /// nb.add("hello".to_string(), "World, hello!".to_string());
+    ///
+    /// let view = nb.get("hello");     // &self 借用从这里开始
+    /// let edit = nb.get_mut("hello"); // ERROR[E0502]: 这里要 &mut self
+    /// println!("{view:?}");           // ← 正是这一行让上面那个借用还活着
+    /// ```
+    ///
+    /// 把最后那行 `println!` 删掉，同样的代码**就能编译通过**——`view` 之后再没
+    /// 被用过，借用在 `get_mut` 之前就结束了。这一半由单元测试
+    /// `borrow_ends_at_last_use` 钉住。
     pub fn get_mut(&mut self, title: &str) -> Option<&mut Entry> {
         self.entries.iter_mut().find(|entry| entry.title == title)
     }
@@ -96,6 +174,21 @@ impl Notebook {
     ///
     /// 这一瞬间，Notebook 是它的最后一个所有者，然后所有权整体移交给出参返回值。
     /// 拿到返回值之后，调用方可以自由使用、改写这个 Entry——它不再属于 Notebook。
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use notebook::Notebook;
+    ///
+    /// let mut nb = Notebook::new();
+    /// nb.add("todo".to_string(), "write a test".to_string());
+    ///
+    /// let mut entry = nb.remove("todo").unwrap();
+    /// entry.body.push_str(" (mine now)"); // 归调用方了，随便改
+    ///
+    /// assert!(nb.get("todo").is_none());
+    /// assert_eq!(entry.body, "write a test (mine now)");
+    /// ```
     pub fn remove(&mut self, title: &str) -> Option<Entry> {
         let index = self.entries.iter().position(|entry| entry.title == title)?;
         Some(self.entries.remove(index))
@@ -125,6 +218,12 @@ mod tests {
     #[test]
     fn get_missing_returns_none() {
         assert!(Notebook::new().get("nope").is_none());
+    }
+
+    #[test]
+    fn new_and_default_agree() {
+        assert!(Notebook::new().is_empty());
+        assert_eq!(Notebook::new().len(), Notebook::default().len());
     }
 
     #[test]
@@ -162,6 +261,21 @@ mod tests {
         assert!(sample().remove("nope").is_none());
     }
 
+    // 标题不去重：这是 Vec 而非 HashMap 的直接后果，钉一个测试免得以后
+    // 有人默认它是 map 语义。
+    #[test]
+    fn duplicate_titles_are_kept_and_first_one_wins() {
+        let mut nb = Notebook::new();
+        nb.add("dup".to_string(), "first".to_string());
+        nb.add("dup".to_string(), "second".to_string());
+
+        assert_eq!(nb.len(), 2);
+        assert_eq!(nb.get("dup").unwrap().body, "first");
+
+        assert_eq!(nb.remove("dup").unwrap().body, "first");
+        assert_eq!(nb.get("dup").unwrap().body, "second"); // 第二条还在
+    }
+
     // 生命周期教学：get 返回的引用只和 &self 绑定，不和查找键 &str 绑定。
     // 我们可以在拿到返回的 &Entry 之后，仍然把临时构造的 String 键扔掉。
     #[test]
@@ -173,13 +287,22 @@ mod tests {
         assert_eq!(entry.title, "hello");
     }
 
-    // 借用语法教学：同一时刻不能既持有 get 的 &self 借用，又要 get_mut。
-    // 把下面注释掉的那行取消注释，编译器会告诉你 borrow conflict 的具体位置。
+    // 借用语法教学，正面那一半：&self 借用在**最后一次使用**处就结束（NLL），
+    // 所以下面这个 get_mut 完全合法——「声明了一个 &self 借用」本身并不冲突。
+    //
+    // 反面那一半（借用后面还要用，于是真的冲突）写在 `get_mut` 的
+    // ```compile_fail,E0502``` doctest 里，由 cargo test 编译验证；
+    // 放在这里的话，这个文件自己就编译不过了。
     #[test]
-    fn cannot_hold_ref_and_mut_at_once() {
+    fn borrow_ends_at_last_use() {
         let mut nb = sample();
-        let _ref_view = nb.get("hello"); // &self 借用
-        // let _mut_view = nb.get_mut("hello"); // 会编译失败
-        assert!(nb.get_mut("hello").is_some());
+
+        let view = nb.get("hello").unwrap();
+        assert_eq!(view.title, "hello"); // view 最后一次被使用，借用到此为止
+
+        let edit = nb.get_mut("hello").unwrap(); // 于是这里要 &mut self 没问题
+        edit.body = "Edited!".to_string();
+
+        assert_eq!(nb.get("hello").unwrap().body, "Edited!");
     }
 }
