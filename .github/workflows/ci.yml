@@ -7,6 +7,16 @@ on:
     branches: [main]
   pull_request:
 
+# 只读就够了：本工作流不写回仓库、不发布任何东西。默认权限往往更宽，
+# 显式收紧是低成本的好习惯。
+permissions:
+  contents: read
+
+# 同一分支上连着推几次时，取消还没跑完的旧运行，只留最新那次。
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -35,12 +45,29 @@ jobs:
   # MSRV 与 edition 的分工见 docs/01-cargo-and-toolchain.md。
   msrv:
     runs-on: ubuntu-latest
+    # 关键的一行：仓库根目录有 rust-toolchain.toml（channel = "stable"），而
+    # dtolnay/rust-toolchain 只执行 `rustup default`——rustup 的优先级里
+    # toolchain 文件排在 default 前面，所以不设这个环境变量的话，这个 job 会
+    # 拿最新 stable 又跑一遍 check，MSRV 根本没被验证。
+    # 只有 RUSTUP_TOOLCHAIN 能压过 toolchain 文件，完整优先级见
+    # docs/01-cargo-and-toolchain.md#rust-toolchaintoml-会压过-rustup-default。
+    env:
+      RUSTUP_TOOLCHAIN: "1.85"
     steps:
       - uses: actions/checkout@v5
 
       - uses: dtolnay/rust-toolchain@1.85
 
       - uses: Swatinem/rust-cache@v2
+
+      # 先把实际生效的版本打出来，这个 job 一旦又变成空转，日志里一眼能看见。
+      - name: 确认工具链真的是 1.85
+        run: |
+          rustc --version
+          rustc --version | grep -q ' 1\.85\.' || {
+            echo "::error::期望 1.85，实际是 $(rustc --version)——MSRV job 又被 rust-toolchain.toml 劫持了"
+            exit 1
+          }
 
       - name: 在最低支持的 Rust 版本上检查
         run: cargo check --workspace --all-targets --locked

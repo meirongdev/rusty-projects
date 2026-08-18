@@ -34,6 +34,46 @@ components = ["rustfmt", "clippy"]
 
 **MSRV 声明必须靠 CI 验证。** 你本地装的是最新 stable，编译通过只能证明「最新版能编」，永远证明不了「1.85 也能编」。所以 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) 专门开了一个 job 用 1.85 跑 `cargo check`——防止新代码悄悄用上比 1.85 更新的 API 而没人发现。
 
+## rust-toolchain.toml 会压过 rustup default
+
+上面那个 MSRV job 有个隐蔽的坑，本仓库真的踩过：**它一度什么都没验证。**
+
+CI 里常见的写法是 `uses: dtolnay/rust-toolchain@1.85`，这个 action 内部只做两件事——
+`rustup toolchain install 1.85` 和 `rustup default 1.85`。而 rustup 决定「到底用哪个工具链」
+的优先级是从高到低这样的：
+
+| 优先级 | 来源 |
+|--------|------|
+| 1 | 命令行的 `cargo +1.85 ...` |
+| 2 | `RUSTUP_TOOLCHAIN` 环境变量 |
+| 3 | `rustup override set` 设的目录级覆盖 |
+| 4 | **目录里的 `rust-toolchain.toml`** |
+| 5 | `rustup default` 设的默认工具链 |
+
+`rust-toolchain.toml` 排在 `rustup default` **前面**。本仓库根目录正好有一个写着
+`channel = "stable"` 的 toolchain 文件，于是 checkout 之后无论 action 把 default 设成什么，
+在仓库目录里跑 `cargo check` 用的都是最新 stable——那个 job 只是把 `check` 又跑了一遍，
+「1.85 能不能编」从头到尾没被回答过。而且它永远是绿的，所以没人会发现。
+
+看优先级表就知道，只有前三种能压过 toolchain 文件。CI 里最省事的是第二种：
+
+```yaml
+  msrv:
+    env:
+      RUSTUP_TOOLCHAIN: "1.85"   # 唯一能压过 rust-toolchain.toml 的一行
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@1.85
+      - run: cargo check --workspace --all-targets --locked
+```
+
+本仓库还多加了一步「把 `rustc --version` 打出来并断言它确实是 1.85」。**一个只会变绿的检查
+等于没有检查**，所以让它自己证明自己在干活，比相信配置写对了更靠谱。
+
+> 同一条优先级也解释了本地的一个现象：如果你的 `PATH` 里 Homebrew 或系统包管理器装的
+> `cargo` 排在 `~/.cargo/bin` 前面，那你敲的根本不是 rustup 的 shim，`rust-toolchain.toml`
+> 会被完全忽略。`which -a cargo` 一看便知。
+
 ## package、crate 与 workspace
 
 - **crate**：编译的最小单位。分两种——
@@ -46,7 +86,7 @@ components = ["rustfmt", "clippy"]
 
 ```toml
 [workspace]
-members = ["hello_cargo", "guessing_game"]
+members = ["hello_cargo", "guessing_game", "notebook"]
 
 # 虚拟清单不会从成员的 edition 推断 resolver，必须显式写出来，
 # 否则 Cargo 会回落到老的 resolver = "1" 并给出警告。
