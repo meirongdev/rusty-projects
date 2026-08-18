@@ -20,7 +20,7 @@
 |---|------|------|---------|
 | 1 | [`hello_cargo`](./hello_cargo) | Cargo 项目结构与构建流程 | [01](./docs/01-cargo-and-toolchain.md)、[08](./docs/08-formatting-and-macros.md) |
 | 2 | [`guessing_game`](./guessing_game) | 从 Hello World 迈向真实小程序 | [01](./docs/01-cargo-and-toolchain.md)–[09](./docs/09-testing.md) |
-| 3 | [`notebook`](./notebook) | 所有权、借用与生命周期的练习场 | [03](./docs/03-ownership-and-borrowing.md)、[10](./docs/10-lifetimes-and-more-ownership.md) |
+| 3 | [`notebook`](./notebook) | 所有权、借用与生命周期的练习场 | [03](./docs/03-ownership-and-borrowing.md)、[09](./docs/09-testing.md)、[10](./docs/10-lifetimes-and-more-ownership.md) |
 
 ## 前置条件
 
@@ -68,13 +68,13 @@ cargo test --workspace
 cargo new my_example
 ```
 
-Cargo 会自动把 `my_example` 追加进根 `Cargo.toml` 的 `members`，并让新成员的 `version` / `edition` / `license` / `rust-version` 全部继承 workspace（也不会另生成一份 `Cargo.lock`）。剩下两件事需要手动做：
+这一条命令就够了，Cargo 会替你处理好三件事：
 
-1. 删掉 `cargo new` 在新目录里生成的嵌套 `.git/` 和 `.gitignore`——本仓库已经有自己的了：
-   ```bash
-   rm -rf my_example/.git my_example/.gitignore
-   ```
-2. 照着现有项目写一份 `README.md`：**运行方式 → 练到哪些笔记 → 扩展练习**。遇到笔记里还没有的新概念，**写进 `docs/` 再链接过来**，不要写在项目 README 里。
+- 把 `my_example` 追加进根 `Cargo.toml` 的 `members`（输出里会有一行 `Adding my_example as member of workspace`）；
+- 让新成员的 `version` / `edition` / `license` / `rust-version` 全部继承 workspace，也不另生成一份 `Cargo.lock`；
+- **不**创建嵌套的 `.git/` 和 `.gitignore`——检测到已经在一个 git 仓库里时，`cargo new` 会跳过初始化版本库这一步。
+
+需要手动做的只剩一件：照着现有项目写一份 `README.md`，**运行方式 → 练到哪些笔记 → 扩展练习**。遇到笔记里还没有的新概念，**写进 `docs/` 再链接过来**，不要写在项目 README 里。
 
 最后跑一遍上面的自检三件套，确认新成员是干净的。
 

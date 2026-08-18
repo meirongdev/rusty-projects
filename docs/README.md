@@ -17,7 +17,8 @@
 | 09 | [测试与可测试的设计](./09-testing.md) | `#[cfg(test)]`、断言、把不确定性注入成参数 | `guessing_game` |
 | 10 | [生命周期（深入所有权）](./10-lifetimes-and-more-ownership.md) | 借来的引用能活多久、省略规则、`&self` 返回值 | `notebook` |
 
-01 和 08 配合 `hello_cargo` 读，其余配合 `guessing_game` 读。
+01 和 08 配合 `hello_cargo` 读，02–09 配合 `guessing_game` 读，03 和 10 还可以再拿 `notebook` 过一遍——
+所有权那条线在 `guessing_game` 里只是零散用到，在 `notebook` 里才是主角。
 
 ## 每篇笔记的结构
 

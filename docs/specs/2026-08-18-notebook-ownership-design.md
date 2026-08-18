@@ -75,3 +75,19 @@ cargo fmt --all --check
 cargo lint        # = clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 ```
+---
+
+## 实现后的调整（2026-08-18 复审）
+
+上面是当初的设计，原样保留。复审时发现并改掉了几处，这里记下差异，免得后来人照着
+过期的设计读代码：
+
+| 当初写的 | 实际改成 | 为什么 |
+|---------|---------|-------|
+| `get` 加 `#[allow(clippy::needless_lifetimes)]` | 删掉这个 `allow` | 实测 clippy 对「靠 `&self` 规则省略」的情形根本不 lint，这个 `allow` 什么都没压住 |
+| 用注释说明「取消注释这行会 borrow conflict」 | 改成 `compile_fail,E0502` doctest | 原来那行**取消注释后照样编译通过**（NLL：借用之后没再被用过）。断言交给编译器，才不会再写错 |
+| 测试 11 个 | 29 个（10 单元 + 11 单元 + 3 集成 + 5 doctest） | 补了整段 REPL 的测试、`tests/public_api.rs`、以及 doctest |
+| `run(input: impl BufRead)` | `run(input: impl BufRead, out: &mut impl Write) -> io::Result<()>` | 原来的 `run` 直接 `println!`，返回 `()`，**根本没法断言**——注释却写着「让整段交互可测」。把输出也注入进去才算数 |
+| `parse_command -> Option<Command>` | `-> Result<Command, ParseError>` | 缺参数的 `add` 会被报成「unknown command」，把人引去检查拼写。区分「不认识这条命令」和「参数不够」 |
+
+设计文档本身也搬了个位置：`docs/superpowers/specs/` → `docs/specs/`，路径里不再带工具名。

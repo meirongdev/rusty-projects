@@ -1,7 +1,7 @@
 # 03 所有权与借用
 
 > Rust 最核心、也是唯一没有先例可参照的概念。它让内存安全在**编译期**就得到保证，不需要垃圾回收。
-> 对应项目：[`guessing_game`](../guessing_game)
+> 对应项目：[`guessing_game`](../guessing_game)（零散用到）、[`notebook`](../notebook)（专门练这个）
 
 ## 三条规则
 
