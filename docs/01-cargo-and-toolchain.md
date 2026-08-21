@@ -132,7 +132,7 @@ rand = "0.10"
 - **`Cargo.lock` 要提交进版本库。** 本仓库以 binary crate 为主，官方建议提交它，保证任何人 clone 下来都构建出完全一致的依赖版本。CI 里的 `--locked` 参数会校验 lock 与所有 `Cargo.toml` 一致，防止改了清单却忘了更新 lock。
 
 > **版本升级会改 API——这本身就是一课。**
-> 老教程（包括较早印次的《The Rust Programming Language》）写的是 `rand = "0.8"`，配 `rand::thread_rng()` 和 `.gen_range(...)`。从 0.9 起这两个名字改成了 `rand::rng()` 和 `.random_range(...)`；到 0.10，提供 `random_range` 的 trait 又从 `Rng` 挪到了 `RngExt`（细节见[笔记 07](./07-traits.md)）。
+> 老教程（包括较早印次的《The Rust Programming Language》）写的是 `rand = "0.8"`，配 `rand::thread_rng()` 和 `.gen_range(...)`。从 0.9 起这两个名字改成了 `rand::rng()` 和 `.random_range(...)`；到 0.10，提供 `random_range` 的 trait 又从 `Rng` 挪到了 `RngExt`（细节见[笔记 08](./08-traits.md)）。
 > 照着老教程写会直接编译不过。遇到这种情况，去 [docs.rs](https://docs.rs/rand) 查**当前版本**的文档、或读 crate 的 CHANGELOG，是比搜索引擎更可靠的习惯。
 
 ## 常用命令

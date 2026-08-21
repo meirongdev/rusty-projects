@@ -1,6 +1,6 @@
 //! 一个极薄的命令行外壳：读一条命令，调 lib 里的 `Notebook`，打印结果。
 //!
-//! 所有真正的逻辑（增删改查）都在 lib 里，I/O 只留在这里——这正是 docs/09 讲的
+//! 所有真正的逻辑（增删改查）都在 lib 里，I/O 只留在这里——这正是 docs/10 讲的
 //! 「把不确定性关在外面，让逻辑可测」的体现。所有权行为都要去 lib.rs 里看；
 //! 这里只演示一件事：每个命令怎么拿数据（借 / 移动）由 lib 的签名决定，
 //! 而这个文件里的每一处代理由那套签名直接决定。
@@ -105,7 +105,7 @@ fn run(input: impl BufRead, out: &mut impl Write) -> io::Result<()> {
 }
 
 /// derive 了 `Debug` + `PartialEq`，测试里才能直接 `assert_eq!` 整个命令，
-/// 而不用退回 `matches!` 加一串条件（前提见 docs/07）。
+/// 而不用退回 `matches!` 加一串条件（前提见 docs/08）。
 #[derive(Debug, PartialEq, Eq)]
 enum Command {
     Add(String, String),
@@ -127,7 +127,7 @@ const USAGE_DELETE: &str = "delete <title>";
 /// 一行输入没能变成命令的两种原因。
 ///
 /// 做成枚举而不是直接返回一句字符串，理由和 guessing_game 的 `GuessError`
-/// 完全一样（见 docs/06）：调用方能 match，测试能精确断言是哪一种。
+/// 完全一样（见 docs/07）：调用方能 match，测试能精确断言是哪一种。
 #[derive(Debug, PartialEq, Eq)]
 enum ParseError {
     /// 第一个词不是任何已知命令。
@@ -290,7 +290,7 @@ mod tests {
         );
     }
 
-    // 下面几个测的是**整段 REPL**，不是单个函数——docs/09 讲的「让结局可断言」
+    // 下面几个测的是**整段 REPL**，不是单个函数——docs/10 讲的「让结局可断言」
     // 在这里的落法是：把输出也注入进去，于是结局就是那段输出。
 
     #[test]

@@ -18,9 +18,9 @@
 
 | # | 项目 | 主题 | 对应笔记 |
 |---|------|------|---------|
-| 1 | [`hello_cargo`](./hello_cargo) | Cargo 项目结构与构建流程 | [01](./docs/01-cargo-and-toolchain.md)、[08](./docs/08-formatting-and-macros.md) |
-| 2 | [`guessing_game`](./guessing_game) | 从 Hello World 迈向真实小程序 | [01](./docs/01-cargo-and-toolchain.md)–[09](./docs/09-testing.md) |
-| 3 | [`notebook`](./notebook) | 所有权、借用与生命周期的练习场 | [03](./docs/03-ownership-and-borrowing.md)、[09](./docs/09-testing.md)、[10](./docs/10-lifetimes-and-more-ownership.md) |
+| 1 | [`hello_cargo`](./hello_cargo) | Cargo 项目结构与构建流程 | [01](./docs/01-cargo-and-toolchain.md)、[09](./docs/09-formatting-and-macros.md) |
+| 2 | [`guessing_game`](./guessing_game) | 从 Hello World 迈向真实小程序 | [01](./docs/01-cargo-and-toolchain.md)–[04](./docs/04-control-flow.md)、[06](./docs/06-enums-and-pattern-matching.md)–[10](./docs/10-testing.md) |
+| 3 | [`notebook`](./notebook) | 所有权、借用与生命周期的练习场 | [03](./docs/03-ownership-and-borrowing.md)、[05](./docs/05-structs-and-methods.md)、[10](./docs/10-testing.md)、[11](./docs/11-lifetimes-and-more-ownership.md) |
 
 ## 前置条件
 

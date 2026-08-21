@@ -1,4 +1,4 @@
-# 09 测试与可测试的设计
+# 10 测试与可测试的设计
 
 > 测试写起来不难，难的是**让代码可测**。这一节后半段比前半段重要。
 > 对应项目：[`guessing_game`](../guessing_game)、[`notebook`](../notebook)
@@ -20,7 +20,7 @@ mod tests {
 - `#[cfg(test)]` 表示这个模块**只在 `cargo test` 时编译**，`cargo build` 出来的可执行文件里不含测试代码。
 - `use super::*;` 把父模块（这里就是 `main.rs` 本身）的内容引进来，测试才能调用 `parse_guess`。这也是为什么单元测试能访问**私有**函数——它和被测代码在同一个 crate 里。
 - `#[test]` 标记一个测试函数；`assert_eq!` / `assert_ne!` / `assert!` 是最常用的三个断言。
-- `assert_eq!` 要求参与比较的类型实现 `PartialEq`（能比较）和 `Debug`（失败时能打印实际值），所以被测的枚举都 `#[derive(Debug, PartialEq, Eq)]`（见[笔记 07](./07-traits.md)）。
+- `assert_eq!` 要求参与比较的类型实现 `PartialEq`（能比较）和 `Debug`（失败时能打印实际值），所以被测的枚举都 `#[derive(Debug, PartialEq, Eq)]`（见[笔记 08](./08-traits.md)）。
 
 **binary crate（只有 `main.rs`）一样可以写单元测试**，不需要为了测试强行拆出 `lib.rs`。
 
@@ -87,7 +87,7 @@ use notebook::{Entry, Notebook};
 
 教所有权时最常写的一句话是「这样写编译不过」。麻烦在于，这句话本身没人验证——
 本仓库就栽过：`notebook` 里一条注释写着「取消注释这行会编译失败」，实际上取消之后
-照样编译通过（原因见[笔记 10](./10-lifetimes-and-more-ownership.md#坑)）。
+照样编译通过（原因见[笔记 11](./11-lifetimes-and-more-ownership.md#坑)）。
 
 代码块加个 `compile_fail` 就能把这句话交给编译器来管——它要求这段**必须编译失败**，
 一旦哪天真能编过了，`cargo test` 就红给你看：
@@ -127,7 +127,7 @@ fn play(secret_number: u32, input: &mut impl BufRead) -> GameOutcome
 ```
 
 - 秘密数字由调用方传入——随机性挪到了 `main` 里；
-- 输入从注入的 reader 读取——真实运行传 `io::stdin().lock()`，测试传 `BufReader::new(&b"..."[..])`（`impl Trait` 参数见[笔记 07](./07-traits.md)）。
+- 输入从注入的 reader 读取——真实运行传 `io::stdin().lock()`，测试传 `BufReader::new(&b"..."[..])`（`impl Trait` 参数见[笔记 08](./08-traits.md)）。
 
 两个不确定性都变成参数之后，`play` 就是确定性函数：喂什么输入、配什么秘密数字，结果唯一。**这就是依赖注入（dependency injection）最朴素的样子**——不需要任何框架，一个函数参数就够了。
 
@@ -181,7 +181,7 @@ fn invalid_input_keeps_attempt() {
 本项目一共 11 个测试：6 个覆盖 `parse_guess` 与 `Display`，5 个覆盖**整局游戏**——输错不消耗机会、EOF 不死循环、用光 7 次、第几次猜中。
 
 `notebook` 则把上面三种测试都用上了：单元测试盯内部行为，`tests/public_api.rs` 盯公开 API，
-`///` 里的 doctest 盯文档，其中两个 `compile_fail` 例子专门钉住「这样写会报错」。
+`///` 里的 doctest 盯文档，其中三个 `compile_fail` 例子专门钉住「这样写会报错」。
 
 ## 延伸阅读
 

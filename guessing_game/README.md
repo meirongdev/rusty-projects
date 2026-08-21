@@ -38,11 +38,11 @@ That's not a number. Enter an integer between 1 and 100. Try again.
 | [02 变量、常量与基本类型](../docs/02-variables-and-types.md) | `const RANGE_START/END/MAX_GUESSES`、`let mut line`、选 `u32` 导致负数被判为「不是数字」 |
 | [03 所有权与借用](../docs/03-ownership-and-borrowing.md) | `read_line(&mut line)` 可变借用、`cmp(&secret_number)` 不可变借用、`parse_guess(input: &str)` 只借不拿 |
 | [04 控制流](../docs/04-control-flow.md) | **为什么用 `while` 而不是 `for`**：`for` 由迭代器驱动，`continue` 会推进它，非法输入照样消耗机会 |
-| [05 枚举与模式匹配](../docs/05-enums-and-pattern-matching.md) | `GuessError` / `GameOutcome` 携带数据、`match guess.cmp(...)` 处理 `Ordering` |
-| [06 错误处理](../docs/06-error-handling.md) | 自定义错误枚举、`map_err` 转换错误类型、`?` 提前返回、`expect` 何时可接受 |
-| [07 Trait](../docs/07-traits.md) | `use rand::RngExt`（不导入就没有 `random_range`）、`#[derive]`、手写 `impl Display`、`&mut impl BufRead` |
-| [08 格式化与宏](../docs/08-formatting-and-macros.md) | 通篇使用内联格式化参数 `println!("{guess} is too small!")` |
-| [09 测试与可测试的设计](../docs/09-testing.md) | 把随机性和输入注入成参数，让**整局游戏**都可以被 `assert_eq!` |
+| [06 枚举与模式匹配](../docs/06-enums-and-pattern-matching.md) | `GuessError` / `GameOutcome` 携带数据、`match guess.cmp(...)` 处理 `Ordering` |
+| [07 错误处理](../docs/07-error-handling.md) | 自定义错误枚举、`map_err` 转换错误类型、`?` 提前返回、`expect` 何时可接受 |
+| [08 Trait](../docs/08-traits.md) | `use rand::RngExt`（不导入就没有 `random_range`）、`#[derive]`、手写 `impl Display`、`&mut impl BufRead` |
+| [09 格式化与宏](../docs/09-formatting-and-macros.md) | 通篇使用内联格式化参数 `println!("{guess} is too small!")` |
+| [10 测试与可测试的设计](../docs/10-testing.md) | 把随机性和输入注入成参数，让**整局游戏**都可以被 `assert_eq!` |
 
 ## 代码结构
 
@@ -52,7 +52,7 @@ play(secret_number, &mut impl BufRead) -> GameOutcome   一整局，不确定性
 main()                                              只负责生成随机数 + 接上真实 stdin
 ```
 
-这个分层不是为了好看，而是为了让 `play` 成为确定性函数——测试喂固定输入就能复现整局游戏。展开讲在[笔记 09](../docs/09-testing.md#真正的难点让代码可测)。
+这个分层不是为了好看，而是为了让 `play` 成为确定性函数——测试喂固定输入就能复现整局游戏。展开讲在[笔记 10](../docs/10-testing.md#真正的难点让代码可测)。
 
 ## 扩展练习
 

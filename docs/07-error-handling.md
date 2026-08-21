@@ -1,4 +1,4 @@
-# 06 错误处理
+# 07 错误处理
 
 > Rust 没有异常。可能失败的操作把失败写进**返回类型**里，编译器逼着你处理。
 > 对应项目：[`guessing_game`](../guessing_game)
@@ -12,7 +12,7 @@ enum Result<T, E> {
 }
 ```
 
-它就是一个普通枚举（[笔记 05](./05-enums-and-pattern-matching.md)），没有任何魔法。`parse()`、`read_line()` 这类可能失败的操作都返回它，你必须显式决定失败时怎么办。
+它就是一个普通枚举（[笔记 06](./06-enums-and-pattern-matching.md)），没有任何魔法。`parse()`、`read_line()` 这类可能失败的操作都返回它，你必须显式决定失败时怎么办。
 
 ## 三种处理方式，从粗到细
 
@@ -69,7 +69,7 @@ enum GuessError {
 
 为什么不直接返回 `String`？因为字符串只能被打印，不能被判断。做成枚举后：调用方可以 `match` 出具体是哪种失败并区别对待，测试可以精确断言 `Err(GuessError::OutOfRange(101))` 而不是比对提示文案，将来加一种错误时编译器还会提醒所有没覆盖到的地方。
 
-`#[derive(...)]` 在这里的作用见[笔记 07](./07-traits.md)：`Debug` 让它能被 `{:?}` 打印（`assert_eq!` 失败时靠它），`PartialEq` 让它能用 `==` 比较（测试里要用）。
+`#[derive(...)]` 在这里的作用见[笔记 08](./08-traits.md)：`Debug` 让它能被 `{:?}` 打印（`assert_eq!` 失败时靠它），`PartialEq` 让它能用 `==` 比较（测试里要用）。
 
 ## `map_err`：转换错误类型
 
@@ -83,7 +83,7 @@ enum GuessError {
 
 ## 「出了什么事」和「怎么说给人听」要分开
 
-错误类型只负责描述发生了什么，展示交给 `Display`（[笔记 07](./07-traits.md)）：
+错误类型只负责描述发生了什么，展示交给 `Display`（[笔记 08](./08-traits.md)）：
 
 ```rust
 println!("{error} Try again.");

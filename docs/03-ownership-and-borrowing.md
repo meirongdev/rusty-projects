@@ -36,6 +36,9 @@ play(secret_number, &mut io::stdin().lock());   // secret_number: u32，按位�
 
 **借用规则**：同一时刻，要么有任意多个 `&T`，要么只有一个 `&mut T`，二者不能共存。这一条从根上消灭了数据竞争。
 
+方法上的 `&self` / `&mut self` 是同一回事——它们只是 `self: &Self` / `self: &mut Self` 的简写，
+所以「拿值还是拿借用」的判断标准一模一样，详见[笔记 05](./05-structs-and-methods.md#self-的三种写法就是参数的三种拿法)。
+
 本仓库里四种借用都出现了：
 
 ```rust

@@ -3,11 +3,11 @@
 //! 这个 crate 没有 I/O、没有讲究的算法——它的意义是一个「谁持有数据始终清楚」的
 //! 小例子。每一个公开方法在哪一种所有权行为上做文章，都写在方法头上，
 //! 读完代码就相当于复习了 docs/03-ownership-and-borrowing.md 与
-//! docs/10-lifetimes-and-more-ownership.md 两篇笔记。
+//! docs/11-lifetimes-and-more-ownership.md 两篇笔记。
 //!
 //! 方法头上那些 ` ```compile_fail ` 例子不是摆设：`cargo test` 会真的去编译它们，
 //! 并要求编译**失败**。所有权的「这样写会报错」在这里是被工具钉住的断言，
-//! 而不是一句没人验证的注释——doctest 的用法见 docs/09-testing.md。
+//! 而不是一句没人验证的注释——doctest 的用法见 docs/10-testing.md。
 //!
 //! # Examples
 //!
@@ -36,6 +36,19 @@ pub struct Entry {
 }
 
 /// 一个笔记本：Vec 里每一项 Entry 的唯一所有者就是这个 Notebook 自己。
+///
+/// 注意 `entries` **没有**标 `pub`——`pub struct` 只让类型本身公开，字段默认仍是私有的。
+/// 于是外面只能通过下面那些方法操作笔记本，碰不到 `Vec` 本身：「标题不去重」这类规则
+/// 因此有地方可守，将来换成 `HashMap` 也不会惊动任何调用方。这也正是
+/// `tests/public_api.rs`「只看得见 pub 的东西」的由来（见 docs/05-structs-and-methods.md）。
+///
+/// # Examples
+///
+/// 私有字段意味着外部 crate 造不出 `Notebook`，必须走 [`Notebook::new`]：
+///
+/// ```compile_fail,E0451
+/// let nb = notebook::Notebook { entries: Vec::new() }; // ERROR: field `entries` is private
+/// ```
 #[derive(Debug, Default)]
 pub struct Notebook {
     entries: Vec<Entry>,

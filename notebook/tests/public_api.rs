@@ -1,6 +1,6 @@
 //! 集成测试：站在**使用者**的角度用 `notebook`。
 //!
-//! 和 `src/lib.rs` 里的单元测试有两点根本区别（见 docs/09）：
+//! 和 `src/lib.rs` 里的单元测试有两点根本区别（见 docs/10）：
 //!
 //! 1. `tests/` 下的每个文件都是**独立的 crate**，只能通过 `use notebook::...`
 //!    引入，因此只碰得到 `pub` 的东西——私有的 `entries` 字段在这里根本不存在。
@@ -32,7 +32,7 @@ fn a_full_session_through_the_public_api_only() {
 /// **活得更久**。
 ///
 /// 换成 `get` 返回的借用，这段代码根本编译不过——借用不能比被借的东西活得久。
-/// 「借，就要受生命周期约束；干脆交出所有权，就解放了」（docs/10）在这里
+/// 「借，就要受生命周期约束；干脆交出所有权，就解放了」（docs/11）在这里
 /// 是一段能跑的代码，而不是一句话。
 #[test]
 fn removed_entry_outlives_the_notebook_it_came_from() {

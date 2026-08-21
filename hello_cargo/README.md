@@ -20,7 +20,7 @@ Hello, world!
 | 笔记 | 在这个项目里的体现 |
 |------|-------------------|
 | [01 Cargo 与工具链](../docs/01-cargo-and-toolchain.md) | `Cargo.toml` 清单与 workspace 字段继承、`src/main.rs` 作为 binary crate 入口、`cargo check` / `build` / `run` 的分工 |
-| [08 格式化与宏](../docs/08-formatting-and-macros.md) | `println!` 的 `!` 为什么代表宏、`{}` 占位符 |
+| [09 格式化与宏](../docs/09-formatting-and-macros.md) | `println!` 的 `!` 为什么代表宏、`{}` 占位符 |
 
 > 本目录下只有 `Cargo.toml` 和 `src/`，没有 `Cargo.lock` 和 `target/`——因为本仓库是一个 workspace，这两样在根目录被所有成员共享。独立项目里它们会出现在项目自己的目录下。
 

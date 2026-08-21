@@ -1,4 +1,4 @@
-# 07 Trait
+# 08 Trait
 
 > Trait 定义「一类类型共有的行为」。Rust 里方法常常不写在类型里，而是由 trait 提供——**这带来一条新手必踩的规则：trait 不导入，方法就不存在。**
 > 对应项目：[`guessing_game`](../guessing_game)

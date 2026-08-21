@@ -51,7 +51,7 @@ pub struct Notebook { entries: Vec<Entry> }               // Notebook 是每个 
 
 REPL：`add <title> <body...>` / `get <title>` / `edit <title> <body...>` / `delete <title>` /
 `list` / `help` / `quit`。标题取第一个词，正文取剩余所有词。I/O 全部留在 main，lib 零 I/O
-（复习 docs/09 可测性）。`run(input: impl BufRead)` 让整段交互可用注入的输入测试；`parse_command`
+（复习 docs/10 可测性）。`run(input: impl BufRead)` 让整段交互可用注入的输入测试；`parse_command`
 为纯函数并有单测。
 
 ## 测试（11 个）
@@ -62,7 +62,7 @@ main（3）：解析 add 带正文；短别名（ls/q）；未知/空命令拒�
 
 ## 文档
 
-- 新增 `docs/10-lifetimes-and-more-ownership.md`：生命周期为什么存在、省略规则、`get` 的
+- 新增 `docs/11-lifetimes-and-more-ownership.md`：生命周期为什么存在、省略规则、`get` 的
   `&self` 返回教学、坑（不能返回局部引用、借用互斥），含不通过代码 + 编译器报错（放在文档，
   遵循「文档里讲解概念」的约定）。
 - `docs/03` 保持不变（三规则/移动/借用）。
@@ -91,3 +91,9 @@ cargo test --workspace
 | `parse_command -> Option<Command>` | `-> Result<Command, ParseError>` | 缺参数的 `add` 会被报成「unknown command」，把人引去检查拼写。区分「不认识这条命令」和「参数不够」 |
 
 设计文档本身也搬了个位置：`docs/superpowers/specs/` → `docs/specs/`，路径里不再带工具名。
+
+> **2026-08-22 补记**：`docs/` 新增了[05 结构体与方法](../05-structs-and-methods.md)，
+> 原 05–10 顺次后移成 06–11，所以上面正文里提到的 `docs/10`、`docs/11-lifetimes-...`
+> 等编号已按新顺序改写过。同时给 `Notebook` 结构体补了一个 `compile_fail,E0451` 的
+> doctest（钉住「私有字段没法从外部构造」），测试总数因此从 29 变成 30
+>（10 单元 + 11 单元 + 3 集成 + 6 doctest）。

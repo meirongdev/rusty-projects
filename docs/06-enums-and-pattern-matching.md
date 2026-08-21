@@ -1,4 +1,4 @@
-# 05 枚举与模式匹配
+# 06 枚举与模式匹配
 
 > Rust 的枚举能**携带数据**，这让它比其他语言的 enum 强大得多；`match` 则强制你把每种可能都处理掉。
 > 对应项目：[`guessing_game`](../guessing_game)
@@ -22,6 +22,8 @@ enum GameOutcome {
 
 `OutOfRange(u32)` 带上了具体数值，调用方就能给出更精确的提示；`Won { attempts }` 让「第几次猜中的」变成结果的一部分。
 
+后两种形态的语法和结构体是共用的（元组结构体、具名字段），见[笔记 05](./05-structs-and-methods.md#结构体把几个值捆成一个类型)。
+
 **用带数据的枚举而不是字符串来表示错误或状态**，好处是调用方能对它做模式匹配，测试里也能精确断言「是哪一种」，而不是去比对提示文案：
 
 ```rust
@@ -29,7 +31,7 @@ assert_eq!(parse_guess("101"), Err(GuessError::OutOfRange(101)));
 assert_eq!(play(42, &mut input), GameOutcome::Won { attempts: 1 });
 ```
 
-> 标准库里最重要的两个枚举也是这个套路：`Option<T>`（`Some(T)` / `None`，用来表达「可能没有值」，取代其他语言的 `null`）和 `Result<T, E>`（见[笔记 06](./06-error-handling.md)）。
+> 标准库里最重要的两个枚举也是这个套路：`Option<T>`（`Some(T)` / `None`，用来表达「可能没有值」，取代其他语言的 `null`）和 `Result<T, E>`（见[笔记 07](./07-error-handling.md)）。
 
 ## `match`：穷尽的多分支
 
